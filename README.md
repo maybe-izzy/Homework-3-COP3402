@@ -4,6 +4,7 @@ GENERAL INFO
 ======================================
 To compile: 
   make compiler
+  
 To run: 
   ./compiler inputfilename.pl0
 
