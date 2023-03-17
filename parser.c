@@ -15,22 +15,13 @@ static token tok;
 static char relationals[][3] = {"=", "<>", "<", "<=", ">", ">=" }; 
 static token_type begin_stmt_tokens[] = {identsym, beginsym, ifsym, whilesym, readsym, writesym, skipsym}; 
 
-static int get_rel_op(char *op){
+static rel_op get_rel_op(char *op){
     for (int i = 0; i < NUM_RELATIONALS; i++){
         if (strcmp(op, relationals[i]) == 0){
-            return i; 
+          return i; 
         }
     }
     return -1; 
-}
-
-static bool can_begin_stmt(token_type tt){
-    for (int i = 0; i < CAN_BEGIN_STMT; i++){
-        if (tt == begin_stmt_tokens[i]){
-            return true; 
-        }
-    }
-    return false; 
 }
 
 void parser_open(const char *filename){
@@ -185,7 +176,7 @@ AST *parse_term(){
     return factor; 
 }
 
-AST *parse_L_factor(){
+AST *parse_expression(){
     token fst = tok;
     AST *exp = parse_term();
     while (tok.typ == plussym || tok.typ == minussym) {
@@ -193,11 +184,6 @@ AST *parse_L_factor(){
 	    exp = ast_bin_expr(fst, exp, rght->data.op_expr.arith_op, rght->data.op_expr.exp);
     }
     return exp;
-}
-
-AST *parse_expression(){
-    AST *lexpr = parse_L_factor(); 
-    return lexpr; 
 }
 
 AST *parse_becomes_stmt(){
@@ -273,36 +259,42 @@ static bool can_start_exp(token_type tt){
 }
 
 AST *parse_while_stmt(){
-    token while_tok = tok;
-    eat(whilesym); 
-    AST *cond = parse_condition(); 
-    eat(dosym); 
-    AST *stmt = parse_stmt(); 
-    return ast_while_stmt(while_tok, cond, stmt); 
+  token while_tok = tok;
+  eat(whilesym); 
+  AST *cond = parse_condition(); 
+  eat(dosym); 
+  AST *stmt = parse_stmt(); 
+  return ast_while_stmt(while_tok, cond, stmt); 
 }
 
 AST *parse_condition(){
-    if (tok.typ == oddsym){
-        token odd_tok = tok; 
-        eat(oddsym); 
-        AST *exp = parse_expression(); 
-        return ast_odd_cond(odd_tok, exp);
-    }
-    else if (can_start_exp(tok.typ)){
-        token start_tok = tok; 
-        AST *exp1 = parse_expression(); 
-        token op_tok = tok;
-        rel_op op = get_rel_op(op_tok.text); 
-        eat(op_tok.typ); 
-        AST *exp2 = parse_expression(); 
-        return ast_bin_cond(start_tok, exp1, op, exp2); 
-    }
-    else {
-        token_type expected[] = {oddsym, plussym, minussym, numbersym, identsym, lparensym};
+  if (tok.typ == oddsym){
+      token odd_tok = tok; 
+      eat(oddsym); 
+      AST *exp = parse_expression(); 
+      return ast_odd_cond(odd_tok, exp);
+  }
+  else if (can_start_exp(tok.typ)){
+      token start_tok = tok; 
+      AST *exp1 = parse_expression(); 
+      token op_tok = tok;
+      rel_op op = get_rel_op(op_tok.text); 
+
+      // If not a relational operator 
+      if (op == -1){
+        token_type expected[6] = {eqsym, neqsym, lessym, leqsym, gtrsym, geqsym}; 
         parse_error_unexpected(expected, 6, tok);
-    }
-    // Should never execute
-    return (AST *) NULL; 
+      }
+      eat(op_tok.typ); 
+      AST *exp2 = parse_expression(); 
+      return ast_bin_cond(start_tok, exp1, op, exp2); 
+  }
+  else {
+      token_type expected[] = {oddsym, plussym, minussym, numbersym, identsym, lparensym};
+      parse_error_unexpected(expected, 6, tok);
+  }
+  // Should never execute
+  return (AST *) NULL; 
 }
 
 AST *parse_stmt(){
@@ -330,12 +322,8 @@ AST *parse_stmt(){
             ret = parse_skip_stmt();
             break; 
         default:
-            token_type expected[] = {identsym, beginsym, ifsym, whilesym, readsym, writesym, skipsym}; 
-            parse_error_unexpected(expected, CAN_BEGIN_STMT, tok);
+            parse_error_unexpected(begin_stmt_tokens, CAN_BEGIN_STMT, tok);
     } 
-    /*if (tok.typ == semisym){
-        eat(semisym); 
-    }*/
     return ret;
 }
 
@@ -353,11 +341,8 @@ static AST_list parseConstDecls(){
     AST_list head = ast_list_empty_list();  
 
     if (tok.typ == constsym){
-       // token const_tok = tok;
         eat(constsym);
         head = parseConstDecl(); 
-        //head->file_loc.column = const_tok.column; // Adjust to allow usage of helper
-       // head->file_loc.line = const_tok.line; 
         AST_list last = head;
         while (tok.typ == commasym) {
             eat(commasym);
