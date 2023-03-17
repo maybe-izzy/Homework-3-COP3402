@@ -353,11 +353,11 @@ static AST_list parseConstDecls(){
     AST_list head = ast_list_empty_list();  
 
     if (tok.typ == constsym){
-        token const_tok = tok;
+       // token const_tok = tok;
         eat(constsym);
         head = parseConstDecl(); 
-        head->file_loc.column = const_tok.column; // Adjust to allow usage of helper
-        head->file_loc.line = const_tok.line; 
+        //head->file_loc.column = const_tok.column; // Adjust to allow usage of helper
+       // head->file_loc.line = const_tok.line; 
         AST_list last = head;
         while (tok.typ == commasym) {
             eat(commasym);
@@ -383,11 +383,8 @@ static AST_list parseVarDecls(){
     AST_list head = ast_list_empty_list();  
 
     if (tok.typ == varsym){
-        token vartok = tok; 
         eat(varsym); 
         head = parseVarDecl(); 
-        head->file_loc.column = vartok.column; // Adjust to allow usage of helper
-        head->file_loc.line = vartok.line; 
         AST_list last = head;
         while (tok.typ == commasym) {
             eat(commasym);
