@@ -31,7 +31,7 @@ void unparseBlock(FILE *out, AST *ast, int level)
     AST *stmt = ast->data.program.stmt;
     unparseConstDecls(out, cds, level);
     unparseVarDecls(out, vds, level);
-    unparseStmt(out, stmt, level, false); 
+    unparseStmt(out, stmt, level, false);
 }
 
 // Unparse the list of const-decls given by the AST cds to out

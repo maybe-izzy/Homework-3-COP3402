@@ -1,4 +1,4 @@
-/* $Id: ast.h,v 1.13 2023/02/21 03:32:51 leavens Exp leavens $ */
+/* $Id: ast.h,v 1.13 2023/02/21 03:32:51 leavens Exp $ */
 #ifndef _AST_H
 #define _AST_H
 #include <stdbool.h>

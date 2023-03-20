@@ -65,6 +65,7 @@ AST *parse_num_expr(){
     token t = tok; 
     token num_tok; 
     short mult = 1; 
+    token_type expected[] = {plussym, minussym, numbersym};
 
     switch (tok.typ){
         case (plussym): 
@@ -79,7 +80,6 @@ AST *parse_num_expr(){
             eat(numbersym); 
             break;
         default: 
-            token_type expected[] = {plussym, minussym, numbersym};
             parse_error_unexpected(expected, 3, tok);
     }   
     return ast_number(t, num_tok.value * mult);
@@ -121,7 +121,8 @@ AST *parse_factor(){
 
 AST *parse_add_sub_term(){
     token opt = tok;
-    
+    token_type expected[] = {plussym, minussym};
+
     switch (tok.typ) {
         case plussym:
 	        eat(plussym);
@@ -134,7 +135,6 @@ AST *parse_add_sub_term(){
             return ast_op_expr(opt, subop, e);
             break;
         default:
-            token_type expected[2] = {plussym, minussym};
             parse_error_unexpected(expected, 2, tok);
             break;
     }
@@ -144,7 +144,9 @@ AST *parse_add_sub_term(){
 
 
 AST *parse_mult_div_factor(){
+    token_type expected[] = {multsym, divsym};
     token opt = tok;
+
     switch (tok.typ) {
         case multsym:
         eat(multsym);
@@ -157,7 +159,6 @@ AST *parse_mult_div_factor(){
 	    return ast_op_expr(opt, divop, e);
 	    break;
     default:
-	    token_type expected[2] = {multsym, divsym};
 	    parse_error_unexpected(expected, 2, tok);
 	    break;
     }
